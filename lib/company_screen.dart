@@ -105,9 +105,9 @@ class _CompanyScreenState extends State<CompanyScreen>
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
-                      const Color(0xFFF8F9FD),
-                      const Color(0xFFF0F5FF),
+                    colors: const [
+                      Color(0xFFF8F9FD),
+                      Color(0xFFF0F5FF),
                       Colors.white,
                     ],
                     stops: [0.0, 0.5 + (_animationController.value * 0.1), 1.0],

@@ -67,7 +67,7 @@ class _StepTwoScreenState extends State<StepTwoScreen> {
                   return Center(
                     child: Column(
                       children: [
-                        Icon(Icons.error_outline, size: 40, color: Colors.red),
+                        const Icon(Icons.error_outline, size: 40, color: Colors.red),
                         SizedBox(height: 8.h),
                         Text(
                           'حدث خطأ أثناء جلب المعلومات',
@@ -85,7 +85,7 @@ class _StepTwoScreenState extends State<StepTwoScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFF5951F),
                           ),
-                          child: Text('إعادة المحاولة'),
+                          child: const Text('إعادة المحاولة'),
                         ),
                       ],
                     ),
@@ -104,7 +104,7 @@ class _StepTwoScreenState extends State<StepTwoScreen> {
                       children: [
                         // Form header with explanation
                         Container(
-                          padding: EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: Colors.blue[50],
                             borderRadius: BorderRadius.circular(8),
@@ -136,12 +136,12 @@ class _StepTwoScreenState extends State<StepTwoScreen> {
                         // Wallet input field
                         TextFormField(
                           controller: walletController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             filled: true,
-                            fillColor: const Color(0xffEFF1F9),
-                            border: const OutlineInputBorder(
+                            fillColor: Color(0xffEFF1F9),
+                            border: OutlineInputBorder(
                                 borderSide: BorderSide.none),
-                            contentPadding: const EdgeInsets.symmetric(
+                            contentPadding: EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 15),
                             hintText: 'أدخل رقم المحفظة الخاص بك',
                           ),
@@ -327,7 +327,7 @@ class _StepTwoScreenState extends State<StepTwoScreen> {
   // STEP 2 EXPLANATION WIDGET - ENGLISH AND ARABIC
   Widget StepTwoExplanation() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.grey[100],
         borderRadius: BorderRadius.circular(8),
@@ -418,7 +418,7 @@ class _StepTwoScreenState extends State<StepTwoScreen> {
   // Helper to build bullet points
   Widget buildBulletPoint(String text) {
     return Padding(
-      padding: EdgeInsets.only(left: 8, bottom: 8),
+      padding: const EdgeInsets.only(left: 8, bottom: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

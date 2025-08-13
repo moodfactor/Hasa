@@ -232,7 +232,7 @@ class _SendMoneyStepsScreenState extends State<SendMoneyStepsScreen> {
         // log("Dio error response: ${dioError.response?.data}");
       }
       throw Exception("حدث خطأ أثناء جلب البيانات: ${dioError.message}");
-    } catch (e, stackTrace) {
+    } catch (e) {
       // log("حدث خطأ أثناء جلب البيانات: $e");
       // log("StackTrace: $stackTrace");
       throw Exception("حدث خطأ أثناء جلب البيانات: $e");
@@ -787,20 +787,20 @@ class _SendMoneyStepsScreenState extends State<SendMoneyStepsScreen> {
               String cleanText = plainText.trim();
               Clipboard.setData(ClipboardData(text: cleanText));
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
+                const SnackBar(
                   content: Text('تم نسخ النص'),
                   backgroundColor: Colors.green,
-                  duration: const Duration(seconds: 1),
+                  duration: Duration(seconds: 1),
                 ),
               );
             }
           } catch (e) {
             // Handle errors gracefully
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              const SnackBar(
                 content: Text('تعذر نسخ النص'),
                 backgroundColor: Colors.red,
-                duration: const Duration(seconds: 1),
+                duration: Duration(seconds: 1),
               ),
             );
           }
@@ -1106,7 +1106,7 @@ class _SendMoneyStepsScreenState extends State<SendMoneyStepsScreen> {
                                   }
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
+                                    const SnackBar(
                                       content:
                                           Text('حدث خطأ أثناء إرسال البيانات'),
                                       backgroundColor: Colors.red,
@@ -1803,18 +1803,13 @@ class _SendMoneyStepsScreenState extends State<SendMoneyStepsScreen> {
                         SizedBox(height: 16.h),
                         TextFormField(
                           controller: walletController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             filled: true,
-                            fillColor: const Color(0xffEFF1F9),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none),
-                            contentPadding: const EdgeInsets.symmetric(
+                            fillColor: Color(0xffEFF1F9),
+                            border:
+                                OutlineInputBorder(borderSide: BorderSide.none),
+                            contentPadding: EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 15),
-                            errorStyle: TextStyle(
-                              color: Colors.red,
-                              fontSize: 12.sp,
-                              fontFamily: 'Cairo',
-                            ),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -1834,10 +1829,7 @@ class _SendMoneyStepsScreenState extends State<SendMoneyStepsScreen> {
                 } else {
                   final dynamic formDataMap = data['form_data']?['form_data'];
                   if (formDataMap is Map<String, dynamic>) {
-                    return Form(
-                      key: _formKey,
-                      child: buildDynamicForm(formDataMap),
-                    );
+                    return buildDynamicForm(formDataMap);
                   } else {
                     return const Center(
                         child: Text('تنسيق بيانات النموذج غير صحيح'));
@@ -1852,19 +1844,172 @@ class _SendMoneyStepsScreenState extends State<SendMoneyStepsScreen> {
               height: 50,
               child: ElevatedButton(
                 onPressed: () async {
-                  // التحقق من صحة النموذج قبل المتابعة
-                  if (_formKey.currentState?.validate() != true) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('يرجى إدخال جميع البيانات المطلوبة'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
+                  // Registrar presión del botón
+                  log("===========================================================");
+                  log("🔵 BUTTON PRESSED - STARTING FORM SUBMISSION");
+
+                  // Registrar el valor del wallet_id
+                  log("🔵 Wallet ID value: ${walletController.text}");
+                  log("🔵 Form key state: ${_formKey.currentState != null ? 'exists' : 'null'}");
+                  log("===========================================================");
+
+                  // If we are in the default form mode, try to validate
+                  // even if validation fails, we continue for debugging purposes
+                  bool formIsValid = true;
+                  if (_formKey.currentState != null) {
+                    formIsValid = _formKey.currentState!.validate();
+                    log("🔵 Form validation result: ${formIsValid ? 'valid' : 'invalid'}");
                   }
 
-                  // بقية الكود الأصلي هنا
-                  // ... existing code ...
+                  try {
+                    // Log transaction details for debugging
+                    log("🔵 Transaction details available: ${transactionDetails != null ? 'yes' : 'no'}");
+
+                    final dynamicExchangeId = transactionDetails["exchange"]
+                                ?["exchange_id"]
+                            ?.toString() ??
+                        widget.exchangeId;
+
+                    log("🔵 Using exchange_id: $dynamicExchangeId");
+
+                    final checkFormUrl =
+                        'https://ha55a.exchange/api/v1/order/check-form.php?exchange_id=$dynamicExchangeId';
+
+                    log("🔵 Sending request to: $checkFormUrl");
+                    final checkFormResponse = await dio.get(checkFormUrl);
+
+                    // Log the complete response to verify its structure
+                    if (checkFormResponse.statusCode == 200) {
+                      log("🔵 check-form.php response status: ${checkFormResponse.statusCode}");
+                      log("🔵 check-form.php response data: ${jsonEncode(checkFormResponse.data)}");
+                    } else {
+                      log("🔴 check-form.php error: ${checkFormResponse.statusCode} - ${checkFormResponse.statusMessage}");
+                    }
+
+                    String dynamicFormId = "defaultFormId";
+                    if (checkFormResponse.statusCode == 200 &&
+                        checkFormResponse.data != null) {
+                      final data = checkFormResponse.data;
+                      if (data is Map) {
+                        // Log is_default
+                        log("🔵 is_default value: ${data["is_default"]}");
+
+                        if (data.containsKey("result") &&
+                            data["result"] != null) {
+                          dynamicFormId = data["result"].toString();
+                        } else if (data["is_default"] == true) {
+                          dynamicFormId = "0";
+                        } else if (data.containsKey("form_data") &&
+                            data["form_data"] is Map &&
+                            data["form_data"]["id"] != null) {
+                          dynamicFormId = data["form_data"]["id"].toString();
+                        }
+                      }
+                    }
+
+                    log("🔵 Using formId: $dynamicFormId");
+
+                    if (dynamicFormId == "0") {
+                      final walletId = walletController.text.trim();
+                      final step3Url =
+                          'https://ha55a.exchange/api/v1/order/step3.php?exchange_id=$dynamicExchangeId&wallet_id=$walletId';
+
+                      log("===========================================================");
+                      log("🔵 STEP3.PHP API REQUEST DETAILS:");
+                      log("🔵 URL: $step3Url");
+                      log("🔵 METHOD: GET");
+                      log("🔵 HEADERS:");
+                      log("🔵 - Content-Type: application/json");
+                      log("🔵 - Accept: application/json");
+                      log("🔵 PARAMETERS:");
+                      log("🔵 - exchange_id: $dynamicExchangeId");
+                      log("🔵 - wallet_id: $walletId");
+                      log("🔵 - currency: IQD"); // Fixed currency value
+                      log("🔵 - exchange_rate: 1500"); // Fixed exchange rate
+                      log("🔵 - version: 1.0"); // Fixed API version
+                      log("===========================================================");
+
+                      try {
+                        // First log button press to confirm this code is being executed
+                        log("🔵 Button pressed, attempting API call to step3.php");
+
+                        final step3Response = await dio.request(
+                          step3Url,
+                          options: Options(
+                            method: 'GET',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Accept': 'application/json',
+                            },
+                          ),
+                        );
+
+                        log("===========================================================");
+                        if (step3Response.statusCode == 200) {
+                          log("🟢 STEP3.PHP API RESPONSE DETAILS:");
+                          log("🟢 STATUS CODE: ${step3Response.statusCode}");
+                          log("🟢 RESPONSE HEADERS:");
+                          step3Response.headers.forEach((name, values) {
+                            log("🟢 - $name: ${values.join(', ')}");
+                          });
+                          log("🟢 RESPONSE DATA: ${jsonEncode(step3Response.data)}");
+
+                          // Extract specific fields from response if they exist
+                          if (step3Response.data is Map) {
+                            var responseMap = step3Response.data as Map;
+                            log("🟢 SUCCESS: ${responseMap['success']}");
+                            if (responseMap.containsKey('message')) {
+                              log("🟢 MESSAGE: ${responseMap['message']}");
+                            }
+                            if (responseMap.containsKey('order_id')) {
+                              log("🟢 ORDER ID: ${responseMap['order_id']}");
+                            }
+                            if (responseMap.containsKey('exchange_id')) {
+                              log("🟢 EXCHANGE ID: ${responseMap['exchange_id']}");
+                            }
+                          }
+
+                          setState(() {
+                            _currentStep = 2;
+                          });
+                        } else {
+                          log("🔴 STEP3.PHP API ERROR DETAILS:");
+                          log("🔴 STATUS CODE: ${step3Response.statusCode}");
+                          log("🔴 STATUS MESSAGE: ${step3Response.statusMessage}");
+                          log("🔴 RESPONSE HEADERS:");
+                          step3Response.headers.forEach((name, values) {
+                            log("🔴 - $name: ${values.join(', ')}");
+                          });
+                          if (step3Response.data != null) {
+                            log("🔴 ERROR DATA: ${jsonEncode(step3Response.data)}");
+                          }
+                        }
+                        log("===========================================================");
+                      } catch (error) {
+                        log("===========================================================");
+                        log("🔴 STEP3.PHP API EXCEPTION: $error");
+                        if (error is DioException) {
+                          log("🔴 DioException TYPE: ${error.type}");
+                          log("🔴 DioException MESSAGE: ${error.message}");
+                          if (error.response != null) {
+                            log("🔴 STATUS CODE: ${error.response?.statusCode}");
+                            log("🔴 RESPONSE DATA: ${jsonEncode(error.response?.data)}");
+                          }
+                        }
+                        log("===========================================================");
+                      }
+                    } else {
+                      await submitDynamicForm(
+                          formId: dynamicFormId, exchangeId: dynamicExchangeId);
+
+                      setState(() {
+                        _currentStep = 2;
+                      });
+                    }
+                  } catch (e) {
+                    // log("Error in dynamic form submission: $e");
+                    // log("StackTrace: $stackTrace");
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFF5951F),
@@ -1961,10 +2106,10 @@ class _SendMoneyStepsScreenState extends State<SendMoneyStepsScreen> {
           break;
         default:
           fieldWidgets.add(TextFormField(
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               filled: true,
-              fillColor: const Color(0xffEFF1F9),
-              border: const OutlineInputBorder(borderSide: BorderSide.none),
+              fillColor: Color(0xffEFF1F9),
+              border: OutlineInputBorder(borderSide: BorderSide.none),
               hintText: 'الرجاء كتابة رقم المحفظة',
             ),
             onChanged: (value) {
@@ -2051,72 +2196,83 @@ class _SendMoneyStepsScreenState extends State<SendMoneyStepsScreen> {
                     )
                   });
 
-                  log("🔵 Sending file upload request to: https://ha55a.exchange/api/v1/order/upload.php");
-                  log("🔵 IMPORTANT: Sending file with parameter name 'image' as required by the API");
+                  var dio = Dio();
+                  try {
+                    log("🔵 Sending file upload request to: https://ha55a.exchange/api/v1/order/upload.php");
+                    log("🔵 IMPORTANT: Sending file with parameter name 'image' as required by the API");
 
-                  var response = await dio.post(
-                    'https://ha55a.exchange/api/v1/order/upload.php',
-                    data: formData,
-                  );
+                    var response = await dio.post(
+                      'https://ha55a.exchange/api/v1/order/upload.php',
+                      data: formData,
+                    );
 
-                  log("===========================================================");
-                  if (response.statusCode == 200 &&
-                      response.data["success"] == true) {
-                    log("🟢 FILE UPLOAD RESPONSE:");
-                    log("🟢 STATUS CODE: ${response.statusCode}");
-                    log("🟢 RESPONSE DATA: ${jsonEncode(response.data)}");
+                    log("===========================================================");
+                    if (response.statusCode == 200) {
+                      log("🟢 FILE UPLOAD RESPONSE:");
+                      log("🟢 STATUS CODE: ${response.statusCode}");
+                      log("🟢 RESPONSE DATA: ${jsonEncode(response.data)}");
 
-                    var responseData = response.data;
-                    if (responseData["success"] == true &&
-                        responseData["url"] != null) {
-                      log("🟢 FILE UPLOADED SUCCESSFULLY");
-                      log("🟢 UPLOADED URL: ${responseData["url"]}");
+                      var responseData = response.data;
+                      if (responseData["success"] == true &&
+                          responseData["url"] != null) {
+                        log("🟢 FILE UPLOADED SUCCESSFULLY");
+                        log("🟢 UPLOADED URL: ${responseData["url"]}");
 
-                      // احفظ رابط الصورة في formData لاستخدامه لاحقًا في API map.php
-                      final String imageUrl = responseData["url"];
-                      setState(() {
-                        // تحديث النموذج بالرابط الجديد بدلاً من مسار الملف المحلي
-                        _formData[fieldName] = imageUrl;
-                      });
-                      log("🟢 FORM DATA UPDATED: Field '$fieldName' now contains URL: $imageUrl");
-                      log("🟢 This URL will be sent with the form data to map.php");
+                        // احفظ رابط الصورة في formData لاستخدامه لاحقًا في API map.php
+                        final String imageUrl = responseData["url"];
+                        setState(() {
+                          // تحديث النموذج بالرابط الجديد بدلاً من مسار الملف المحلي
+                          _formData[fieldName] = imageUrl;
+                        });
+                        log("🟢 FORM DATA UPDATED: Field '$fieldName' now contains URL: $imageUrl");
+                        log("🟢 This URL will be sent with the form data to map.php");
 
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('تم رفع الملف بنجاح'),
-                        backgroundColor: Colors.green,
-                      ));
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('تم رفع الملف بنجاح'),
+                          backgroundColor: Colors.green,
+                        ));
+                      } else {
+                        log("🔴 FILE UPLOAD SERVER ERROR: ${responseData["message"] ?? "Unknown error"}");
+
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(
+                              'فشل رفع الملف: ${responseData["message"] ?? "خطأ غير معروف"}'),
+                          backgroundColor: Colors.red,
+                        ));
+                      }
                     } else {
-                      log("🔴 FILE UPLOAD SERVER ERROR: ${responseData["message"] ?? "Unknown error"}");
+                      log("🔴 FILE UPLOAD HTTP ERROR: ${response.statusCode}");
+                      log("🔴 STATUS MESSAGE: ${response.statusMessage}");
 
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(
-                            'فشل رفع الملف: ${responseData["message"] ?? "خطأ غير معروف"}'),
+                        content: Text('خطأ في الخادم: ${response.statusCode}'),
                         backgroundColor: Colors.red,
                       ));
                     }
-                  } else {
-                    log("🔴 FILE UPLOAD HTTP ERROR: ${response.statusCode}");
-                    log("🔴 STATUS MESSAGE: ${response.statusMessage}");
+                    log("===========================================================");
+                  } on DioException catch (dioError) {
+                    log("===========================================================");
+                    log("🔴 FILE UPLOAD DIO ERROR:");
+                    log("🔴 ERROR TYPE: ${dioError.type}");
+                    log("🔴 ERROR MESSAGE: ${dioError.message}");
+                    if (dioError.response != null) {
+                      log("🔴 STATUS CODE: ${dioError.response?.statusCode}");
+                      log("🔴 RESPONSE DATA: ${jsonEncode(dioError.response?.data)}");
+                    }
+                    log("===========================================================");
 
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('خطأ في الخادم: ${response.statusCode}'),
+                      content: Text('خطأ في الاتصال: ${dioError.message}'),
                       backgroundColor: Colors.red,
                     ));
                   }
+                } catch (e) {
                   log("===========================================================");
-                } on DioException catch (dioError) {
-                  log("===========================================================");
-                  log("🔴 FILE UPLOAD DIO ERROR:");
-                  log("🔴 ERROR TYPE: ${dioError.type}");
-                  log("🔴 ERROR MESSAGE: ${dioError.message}");
-                  if (dioError.response != null) {
-                    log("🔴 STATUS CODE: ${dioError.response?.statusCode}");
-                    log("🔴 RESPONSE DATA: ${jsonEncode(dioError.response?.data)}");
-                  }
+                  log("🔴 FILE UPLOAD EXCEPTION: $e");
                   log("===========================================================");
 
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('خطأ في الاتصال: ${dioError.message}'),
+                    content: Text('حدث خطأ أثناء رفع الملف: $e'),
                     backgroundColor: Colors.red,
                   ));
                 }
@@ -2212,71 +2368,83 @@ class _SendMoneyStepsScreenState extends State<SendMoneyStepsScreen> {
                     )
                   });
 
-                  log("🔵 Sending image upload request to: https://ha55a.exchange/api/v1/order/upload.php");
-                  log("🔵 IMPORTANT: Sending image with parameter name 'image' as required by the API");
+                  var dio = Dio();
+                  try {
+                    log("🔵 Sending image upload request to: https://ha55a.exchange/api/v1/order/upload.php");
+                    log("🔵 IMPORTANT: Sending image with parameter name 'image' as required by the API");
 
-                  var response = await dio.post(
-                    'https://ha55a.exchange/api/v1/order/upload.php',
-                    data: formData,
-                  );
+                    var response = await dio.post(
+                      'https://ha55a.exchange/api/v1/order/upload.php',
+                      data: formData,
+                    );
 
-                  log("===========================================================");
-                  if (response.statusCode == 200) {
-                    log("🟢 IMAGE UPLOAD RESPONSE:");
-                    log("🟢 STATUS CODE: ${response.statusCode}");
-                    log("🟢 RESPONSE DATA: ${jsonEncode(response.data)}");
+                    log("===========================================================");
+                    if (response.statusCode == 200) {
+                      log("🟢 IMAGE UPLOAD RESPONSE:");
+                      log("🟢 STATUS CODE: ${response.statusCode}");
+                      log("🟢 RESPONSE DATA: ${jsonEncode(response.data)}");
 
-                    var responseData = response.data;
-                    if (responseData["success"] == true &&
-                        responseData["url"] != null) {
-                      log("🟢 IMAGE UPLOADED SUCCESSFULLY");
-                      log("🟢 UPLOADED URL: ${responseData["url"]}");
+                      var responseData = response.data;
+                      if (responseData["success"] == true &&
+                          responseData["url"] != null) {
+                        log("🟢 IMAGE UPLOADED SUCCESSFULLY");
+                        log("🟢 UPLOADED URL: ${responseData["url"]}");
 
-                      // احفظ رابط الصورة في formData لاستخدامه لاحقًا في API map.php
-                      final String imageUrl = responseData["url"];
-                      setState(() {
-                        // تحديث النموذج بالرابط الجديد بدلاً من مسار الملف المحلي
-                        _formData[fieldName] = imageUrl;
-                      });
-                      log("🟢 FORM DATA UPDATED: Field '$fieldName' now contains URL: $imageUrl");
-                      log("🟢 This URL will be sent with the form data to map.php");
+                        // احفظ رابط الصورة في formData لاستخدامه لاحقًا في API map.php
+                        final String imageUrl = responseData["url"];
+                        setState(() {
+                          // تحديث النموذج بالرابط الجديد بدلاً من مسار الملف المحلي
+                          _formData[fieldName] = imageUrl;
+                        });
+                        log("🟢 FORM DATA UPDATED: Field '$fieldName' now contains URL: $imageUrl");
+                        log("🟢 This URL will be sent with the form data to map.php");
 
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('تم رفع الصورة بنجاح'),
-                        backgroundColor: Colors.green,
-                      ));
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('تم رفع الصورة بنجاح'),
+                          backgroundColor: Colors.green,
+                        ));
+                      } else {
+                        log("🔴 IMAGE UPLOAD SERVER ERROR: ${responseData["message"] ?? "Unknown error"}");
+
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(
+                              'فشل رفع الصورة: ${responseData["message"] ?? "خطأ غير معروف"}'),
+                          backgroundColor: Colors.red,
+                        ));
+                      }
                     } else {
-                      log("🔴 IMAGE UPLOAD SERVER ERROR: ${responseData["message"] ?? "Unknown error"}");
+                      log("🔴 IMAGE UPLOAD HTTP ERROR: ${response.statusCode}");
+                      log("🔴 STATUS MESSAGE: ${response.statusMessage}");
 
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(
-                            'فشل رفع الصورة: ${responseData["message"] ?? "خطأ غير معروف"}'),
+                        content: Text('خطأ في الخادم: ${response.statusCode}'),
                         backgroundColor: Colors.red,
                       ));
                     }
-                  } else {
-                    log("🔴 IMAGE UPLOAD HTTP ERROR: ${response.statusCode}");
-                    log("🔴 STATUS MESSAGE: ${response.statusMessage}");
+                    log("===========================================================");
+                  } on DioException catch (dioError) {
+                    log("===========================================================");
+                    log("🔴 IMAGE UPLOAD DIO ERROR:");
+                    log("🔴 ERROR TYPE: ${dioError.type}");
+                    log("🔴 ERROR MESSAGE: ${dioError.message}");
+                    if (dioError.response != null) {
+                      log("🔴 STATUS CODE: ${dioError.response?.statusCode}");
+                      log("🔴 RESPONSE DATA: ${jsonEncode(dioError.response?.data)}");
+                    }
+                    log("===========================================================");
 
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('خطأ في الخادم: ${response.statusCode}'),
+                      content: Text('خطأ في الاتصال: ${dioError.message}'),
                       backgroundColor: Colors.red,
                     ));
                   }
+                } catch (e) {
                   log("===========================================================");
-                } on DioException catch (dioError) {
-                  log("===========================================================");
-                  log("🔴 IMAGE UPLOAD DIO ERROR:");
-                  log("🔴 ERROR TYPE: ${dioError.type}");
-                  log("🔴 ERROR MESSAGE: ${dioError.message}");
-                  if (dioError.response != null) {
-                    log("🔴 STATUS CODE: ${dioError.response?.statusCode}");
-                    log("🔴 RESPONSE DATA: ${jsonEncode(dioError.response?.data)}");
-                  }
+                  log("🔴 IMAGE UPLOAD EXCEPTION: $e");
                   log("===========================================================");
 
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('خطأ في الاتصال: ${dioError.message}'),
+                    content: Text('حدث خطأ أثناء رفع الصورة: $e'),
                     backgroundColor: Colors.red,
                   ));
                 }
@@ -2385,7 +2553,7 @@ class _SendMoneyStepsScreenState extends State<SendMoneyStepsScreen> {
             const SizedBox(height: 8),
             _buildTextField(sendingChargeStr, color: const Color(0xffF9282B)),
             const SizedBox(height: 20),
-            Text('اجمالي مبلغ الاستلام',
+            Text('اجمالي مبلغ الارسال',
                 style: TextStyle(fontFamily: 'Cairo', fontSize: 14.sp)),
             SizedBox(height: 8.h),
             _buildTextField(totalReceivedStr),
@@ -2532,22 +2700,17 @@ class DynamicFormBuilder extends StatefulWidget {
 class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
   final Map<String, dynamic> _localFormData = {};
   final Map<String, TextEditingController> _controllers = {};
-  final Map<String, GlobalKey<FormFieldState>> _fieldKeys = {};
-  final Map<String, bool> _isUploading = {};
-  final Dio _dio = Dio();
 
   @override
   void initState() {
     super.initState();
-    // Initialize _isUploading map for all fields
-    widget.formData.forEach((key, _) {
-      _isUploading[key] = false;
-    });
+    // log("DynamicFormBuilder initialized with ${widget.formData.length} fields");
+    // log("Field keys: ${widget.formData.keys.join(', ')}");
   }
 
   @override
   void dispose() {
-    _controllers.forEach((_, controller) => controller.dispose());
+    _controllers.forEach((key, controller) => controller.dispose());
     super.dispose();
   }
 
@@ -2556,35 +2719,20 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
     if (!_controllers.containsKey(fieldName)) {
       _controllers[fieldName] =
           TextEditingController(text: _localFormData[fieldName] ?? '');
-      _fieldKeys[fieldName] = GlobalKey<FormFieldState>();
     }
-
-    bool isRequired = fieldConfig["required"] == true;
-
     return TextFormField(
-      key: _fieldKeys[fieldName],
       controller: _controllers[fieldName],
       decoration: InputDecoration(
         filled: true,
         fillColor: const Color(0xffEFF1F9),
         border: const OutlineInputBorder(borderSide: BorderSide.none),
-        hintText:
-            "${fieldConfig["name"] ?? fieldName}${isRequired ? ' *' : ''}",
-        errorStyle: TextStyle(
-          color: Colors.red,
-          fontSize: 12.sp,
-          fontFamily: 'Cairo',
-        ),
+        hintText: fieldConfig["name"] ?? fieldName,
+        hintStyle: TextStyle(fontSize: 10.sp),
       ),
-      validator: (value) {
-        if (isRequired && (value == null || value.isEmpty)) {
-          return 'هذا الحقل مطلوب';
-        }
-        return null;
-      },
       onChanged: (value) {
         _localFormData[fieldName] = value;
         widget.onFormDataChanged(_localFormData);
+        // log("Text field ($fieldName) value: $value");
       },
     );
   }
@@ -2618,45 +2766,35 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
     final List<dynamic> options = fieldConfig["options"] ?? [];
     final String fieldLabel =
         fieldConfig["label"] ?? fieldConfig["name"] ?? fieldName;
-    bool isRequired = fieldConfig["required"] == true;
 
-    _fieldKeys[fieldName] = GlobalKey<FormFieldState>();
-
-    return DropdownButtonFormField<String>(
-      key: _fieldKeys[fieldName],
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: const Color(0xffEFF1F9),
-        border: const OutlineInputBorder(borderSide: BorderSide.none),
-        errorStyle: TextStyle(
-          color: Colors.red,
-          fontSize: 12.sp,
-          fontFamily: 'Cairo',
-        ),
-      ),
-      hint: Text(
-        "$fieldLabel${isRequired ? ' *' : ''}",
-        style: TextStyle(fontSize: 10.sp),
-      ),
-      items: options.map<DropdownMenuItem<String>>((option) {
-        return DropdownMenuItem<String>(
-          value: option.toString(),
-          child: Text(option.toString()),
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return DropdownButtonFormField<String>(
+          decoration: const InputDecoration(
+            filled: true,
+            fillColor: Color(0xffEFF1F9),
+            border: OutlineInputBorder(borderSide: BorderSide.none),
+          ),
+          hint: Text(
+            fieldLabel,
+            style: TextStyle(fontSize: 10.sp),
+          ),
+          items: options.map<DropdownMenuItem<String>>((option) {
+            return DropdownMenuItem<String>(
+              value: option.toString(),
+              child: Text(option.toString()),
+            );
+          }).toList(),
+          value: selectedValue,
+          onChanged: (value) {
+            setState(() {
+              selectedValue = value;
+            });
+            _localFormData[fieldName] = value;
+            widget.onFormDataChanged(_localFormData);
+            // log("Select ($fieldName) selected value: $value");
+          },
         );
-      }).toList(),
-      value: selectedValue,
-      validator: (value) {
-        if (isRequired && (value == null || value.isEmpty)) {
-          return 'هذا الحقل مطلوب';
-        }
-        return null;
-      },
-      onChanged: (value) {
-        setState(() {
-          selectedValue = value;
-          _localFormData[fieldName] = value;
-        });
-        widget.onFormDataChanged(_localFormData);
       },
     );
   }
@@ -2732,167 +2870,203 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
 
   // Updated to match backend API which expects 'image' parameter
   Widget buildFileWidget(String fieldName, Map<String, dynamic> fieldConfig) {
-    bool isRequired = fieldConfig["required"] == true;
-    _fieldKeys[fieldName] = GlobalKey<FormFieldState>();
-    _isUploading[fieldName] = _isUploading[fieldName] ?? false;
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        bool isUploading = false;
 
-    return FormField<String>(
-      key: _fieldKeys[fieldName],
-      initialValue: _localFormData[fieldName],
-      validator: (value) {
-        if (isRequired && (value == null || value.isEmpty)) {
-          return 'هذا الحقل مطلوب';
-        }
-        return null;
-      },
-      builder: (FormFieldState<String> state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 50,
-              color: const Color(0xffEFF1F9),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: Text(
-                        state.value != null && state.value!.isNotEmpty
-                            ? (state.value!.contains("/")
-                                ? state.value!.split('/').last
-                                : state.value!)
-                            : 'لم يتم اختيار ملف${isRequired ? ' *' : ''}',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xff909090),
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+        return Container(
+          height: 50,
+          color: const Color(0xffEFF1F9),
+          child: Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Text(
+                    _localFormData[fieldName] != null
+                        ? (_localFormData[fieldName].toString().contains("/")
+                            ? _localFormData[fieldName]
+                                .toString()
+                                .split('/')
+                                .last
+                            : _localFormData[fieldName].toString())
+                        : 'لم يتم اختيار ملف',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontFamily: 'Cairo',
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xff909090),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xffBFBFBF),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
                     ),
                   ),
-                  SizedBox(
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xffBFBFBF),
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                      ),
-                      onPressed: _isUploading[fieldName]!
-                          ? null
-                          : () async {
+                  onPressed: isUploading
+                      ? null
+                      : () async {
+                          log("🔵 File upload button pressed for field: $fieldName");
+
+                          setState(() {
+                            isUploading = true;
+                          });
+
+                          try {
+                            FilePickerResult? result =
+                                await FilePicker.platform.pickFiles();
+                            if (result == null) {
+                              log("🔵 File selection canceled for field: $fieldName");
                               setState(() {
-                                _isUploading[fieldName] = true;
+                                isUploading = false;
                               });
-                              try {
-                                log("🔵 File upload button pressed for field: $fieldName");
-                                FilePickerResult? result =
-                                    await FilePicker.platform.pickFiles();
+                              return;
+                            }
+                            final String filePath = result.files.single.path!;
+                            final String fileName = filePath.split('/').last;
 
-                                if (result == null) {
-                                  log("🔵 File selection canceled for field: $fieldName");
-                                  return;
-                                }
+                            log("🔵 File selected for $fieldName: $fileName (path: $filePath)");
 
-                                final String filePath =
-                                    result.files.single.path!;
-                                final String fileName =
-                                    filePath.split('/').last;
+                            setState(() {
+                              _localFormData[fieldName] = filePath;
+                            });
+                            widget.onFormDataChanged(_localFormData);
 
-                                log("🔵 File selected for $fieldName: $fileName (path: $filePath)");
+                            // Create form data for upload - IMPORTANT: Use 'image' parameter
+                            log("===========================================================");
+                            log("🔵 UPLOADING FILE FOR FIELD: $fieldName");
+                            log("🔵 FILE NAME: $fileName");
+                            log("🔵 FILE PATH: $filePath");
+                            log("🔵 IMPORTANT: Using parameter name 'image' as required by the API");
+                            log("===========================================================");
 
-                                setState(() {
-                                  _localFormData[fieldName] = filePath;
-                                });
-                                widget.onFormDataChanged(_localFormData);
+                            var formData = FormData.fromMap({
+                              'image': await MultipartFile.fromFile(
+                                filePath,
+                                filename: fileName,
+                              )
+                            });
 
-                                var formData = FormData.fromMap({
-                                  'image': await MultipartFile.fromFile(
-                                    filePath,
-                                    filename: fileName,
-                                  )
-                                });
+                            var dio = Dio();
+                            try {
+                              log("🔵 Sending file upload request to: https://ha55a.exchange/api/v1/order/upload.php");
 
-                                var response = await _dio.post(
-                                  'https://ha55a.exchange/api/v1/order/upload.php',
-                                  data: formData,
-                                );
+                              var response = await dio.post(
+                                'https://ha55a.exchange/api/v1/order/upload.php',
+                                data: formData,
+                              );
 
-                                if (response.statusCode == 200 &&
-                                    response.data["success"] == true) {
-                                  final String imageUrl = response.data["url"];
+                              log("===========================================================");
+                              if (response.statusCode == 200) {
+                                log("🟢 FILE UPLOAD RESPONSE:");
+                                log("🟢 STATUS CODE: ${response.statusCode}");
+                                log("🟢 RESPONSE DATA: ${jsonEncode(response.data)}");
+
+                                var responseData = response.data;
+                                if (responseData["success"] == true &&
+                                    responseData["url"] != null) {
+                                  log("🟢 FILE UPLOADED SUCCESSFULLY");
+                                  log("🟢 UPLOADED URL: ${responseData["url"]}");
+
+                                  // Save image URL to form data for later use in API calls
+                                  final String imageUrl = responseData["url"];
                                   setState(() {
                                     _localFormData[fieldName] = imageUrl;
                                   });
                                   widget.onFormDataChanged(_localFormData);
+                                  log("🟢 FORM DATA UPDATED: Field '$fieldName' now contains URL: $imageUrl");
+                                  log("🟢 This URL will be sent with the form data to map.php");
 
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('تم رفع الملف بنجاح'),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(const SnackBar(
+                                    content: Text('تم رفع الملف بنجاح'),
+                                    backgroundColor: Colors.green,
+                                  ));
                                 } else {
-                                  throw Exception('فشل رفع الملف');
-                                }
-                              } catch (e) {
-                                log("🔴 FILE UPLOAD ERROR: $e");
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content:
-                                        Text('حدث خطأ أثناء رفع الملف: $e'),
+                                  log("🔴 FILE UPLOAD SERVER ERROR: ${responseData["message"] ?? "Unknown error"}");
+
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                    content: Text(
+                                        'فشل رفع الملف: ${responseData["message"] ?? "خطأ غير معروف"}'),
                                     backgroundColor: Colors.red,
-                                  ),
-                                );
-                              } finally {
-                                if (mounted) {
-                                  setState(() {
-                                    _isUploading[fieldName] = false;
-                                  });
+                                  ));
                                 }
+                              } else {
+                                log("🔴 FILE UPLOAD HTTP ERROR: ${response.statusCode}");
+                                log("🔴 STATUS MESSAGE: ${response.statusMessage}");
+
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                  content: Text(
+                                      'خطأ في الخادم: ${response.statusCode}'),
+                                  backgroundColor: Colors.red,
+                                ));
                               }
-                            },
-                      child: _isUploading[fieldName]!
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.0,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : Text(
-                              'اختيار ملف',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'Cairo',
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (state.hasError)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0, right: 12),
-                child: Text(
-                  state.errorText!,
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 12.sp,
-                    fontFamily: 'Cairo',
-                  ),
+                              log("===========================================================");
+                            } on DioException catch (dioError) {
+                              log("===========================================================");
+                              log("🔴 FILE UPLOAD DIO ERROR:");
+                              log("🔴 ERROR TYPE: ${dioError.type}");
+                              log("🔴 ERROR MESSAGE: ${dioError.message}");
+                              if (dioError.response != null) {
+                                log("🔴 STATUS CODE: ${dioError.response?.statusCode}");
+                                log("🔴 RESPONSE DATA: ${jsonEncode(dioError.response?.data)}");
+                              }
+                              log("===========================================================");
+
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content:
+                                    Text('خطأ في الاتصال: ${dioError.message}'),
+                                backgroundColor: Colors.red,
+                              ));
+                            }
+                          } catch (e) {
+                            log("===========================================================");
+                            log("🔴 FILE SELECTION ERROR: $e");
+                            log("===========================================================");
+
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('حدث خطأ أثناء اختيار الملف: $e'),
+                              backgroundColor: Colors.red,
+                            ));
+                          } finally {
+                            setState(() {
+                              isUploading = false;
+                            });
+                          }
+                        },
+                  child: isUploading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          'اختيار ملف',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Cairo',
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                 ),
               ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -2901,233 +3075,208 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
   // Updated camera widget to use 'image' parameter
   Widget buildCameraFrontWidget(
       String fieldName, Map<String, dynamic> fieldConfig) {
-    bool isRequired = fieldConfig["required"] == true;
-    _fieldKeys[fieldName] = GlobalKey<FormFieldState>();
-    _isUploading[fieldName] = _isUploading[fieldName] ?? false;
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setLocalState) {
+        bool isUploading = false;
 
-    return FormField<String>(
-      key: _fieldKeys[fieldName],
-      initialValue: _localFormData[fieldName],
-      validator: (value) {
-        if (isRequired && (value == null || value.isEmpty)) {
-          return 'هذا الحقل مطلوب';
-        }
-        return null;
-      },
-      builder: (FormFieldState<String> state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 50,
-              color: const Color(0xffEFF1F9),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: Text(
-                        state.value != null && state.value!.isNotEmpty
-                            ? (state.value!.contains("/")
-                                ? state.value!.split('/').last
-                                : state.value!)
-                            : 'لم يتم التقاط صورة${isRequired ? ' *' : ''}',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xff909090),
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+        return Container(
+          height: 50,
+          color: const Color(0xffEFF1F9),
+          child: Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Text(
+                    _localFormData[fieldName] != null
+                        ? (_localFormData[fieldName].toString().contains("/")
+                            ? _localFormData[fieldName]
+                                .toString()
+                                .split('/')
+                                .last
+                            : _localFormData[fieldName].toString())
+                        : 'لم يتم اختيار صورة',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontFamily: 'Cairo',
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xff909090),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xffBFBFBF),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
                     ),
                   ),
-                  SizedBox(
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xffBFBFBF),
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                      ),
-                      onPressed: _isUploading[fieldName]!
-                          ? null
-                          : () async {
-                              setState(() {
-                                _isUploading[fieldName] = true;
+                  onPressed: isUploading
+                      ? null
+                      : () async {
+                          log("🔵 Camera button pressed for field: $fieldName (front camera)");
+
+                          setLocalState(() {
+                            isUploading = true;
+                          });
+
+                          try {
+                            final picker = ImagePicker();
+                            final pickedFile = await picker.pickImage(
+                              source: ImageSource.camera,
+                              preferredCameraDevice: CameraDevice.front,
+                            );
+                            if (pickedFile == null) {
+                              log("🔵 Camera capture canceled for field: $fieldName");
+                              setLocalState(() {
+                                isUploading = false;
                               });
-                              try {
-                                log("🔵 Camera button pressed for field: $fieldName (front camera)");
-                                try {
-                                  final picker = ImagePicker();
-                                  final pickedFile = await picker.pickImage(
-                                    source: ImageSource.camera,
-                                    preferredCameraDevice: CameraDevice.front,
-                                  );
-                                  if (pickedFile == null) {
-                                    log("🔵 Camera capture canceled for field: $fieldName");
-                                    setState(() {
-                                      _isUploading[fieldName] = false;
-                                    });
-                                    return;
-                                  }
+                              return;
+                            }
 
-                                  final String imagePath = pickedFile.path;
-                                  final String imageName =
-                                      imagePath.split('/').last;
+                            final String imagePath = pickedFile.path;
+                            final String imageName = imagePath.split('/').last;
 
-                                  log("🔵 Image captured for $fieldName: $imageName (path: $imagePath)");
+                            log("🔵 Image captured for $fieldName: $imageName (path: $imagePath)");
 
+                            setState(() {
+                              _localFormData[fieldName] = imagePath;
+                            });
+                            widget.onFormDataChanged(_localFormData);
+
+                            // Create form data for upload - IMPORTANT: Using 'image' parameter
+                            log("===========================================================");
+                            log("🔵 UPLOADING IMAGE FOR FIELD: $fieldName");
+                            log("🔵 IMAGE NAME: $imageName");
+                            log("🔵 IMAGE PATH: $imagePath");
+                            log("🔵 CAMERA: Front");
+                            log("🔵 IMPORTANT: Using parameter name 'image' as required by the API");
+                            log("===========================================================");
+
+                            var formData = FormData.fromMap({
+                              'image': await MultipartFile.fromFile(
+                                imagePath,
+                                filename: imageName,
+                              )
+                            });
+
+                            var dio = Dio();
+                            try {
+                              log("🔵 Sending image upload request to: https://ha55a.exchange/api/v1/order/upload.php");
+
+                              var response = await dio.post(
+                                'https://ha55a.exchange/api/v1/order/upload.php',
+                                data: formData,
+                              );
+
+                              log("===========================================================");
+                              if (response.statusCode == 200) {
+                                log("🟢 IMAGE UPLOAD RESPONSE:");
+                                log("🟢 STATUS CODE: ${response.statusCode}");
+                                log("🟢 RESPONSE DATA: ${jsonEncode(response.data)}");
+
+                                var responseData = response.data;
+                                if (responseData["success"] == true &&
+                                    responseData["url"] != null) {
+                                  log("🟢 IMAGE UPLOADED SUCCESSFULLY");
+                                  log("🟢 UPLOADED URL: ${responseData["url"]}");
+
+                                  // Save image URL to form data for later use in API calls
+                                  final String imageUrl = responseData["url"];
                                   setState(() {
-                                    _localFormData[fieldName] = imagePath;
+                                    _localFormData[fieldName] = imageUrl;
                                   });
                                   widget.onFormDataChanged(_localFormData);
+                                  log("🟢 FORM DATA UPDATED: Field '$fieldName' now contains URL: $imageUrl");
+                                  log("🟢 This URL will be sent with the form data to map.php");
 
-                                  // Create form data for upload - IMPORTANT: Using 'image' parameter
-                                  log("===========================================================");
-                                  log("🔵 UPLOADING IMAGE FOR FIELD: $fieldName");
-                                  log("🔵 IMAGE NAME: $imageName");
-                                  log("🔵 IMAGE PATH: $imagePath");
-                                  log("🔵 CAMERA: Front");
-                                  log("🔵 IMPORTANT: Using parameter name 'image' as required by the API");
-                                  log("===========================================================");
-
-                                  var formData = FormData.fromMap({
-                                    'image': await MultipartFile.fromFile(
-                                      imagePath,
-                                      filename: imageName,
-                                    )
-                                  });
-
-                                  var response = await _dio.post(
-                                    'https://ha55a.exchange/api/v1/order/upload.php',
-                                    data: formData,
-                                  );
-
-                                  log("===========================================================");
-                                  if (response.statusCode == 200) {
-                                    log("🟢 IMAGE UPLOAD RESPONSE:");
-                                    log("🟢 STATUS CODE: ${response.statusCode}");
-                                    log("🟢 RESPONSE DATA: ${jsonEncode(response.data)}");
-
-                                    var responseData = response.data;
-                                    if (responseData["success"] == true &&
-                                        responseData["url"] != null) {
-                                      log("🟢 IMAGE UPLOADED SUCCESSFULLY");
-                                      log("🟢 UPLOADED URL: ${responseData["url"]}");
-
-                                      // Save image URL to form data for later use in API calls
-                                      final String imageUrl =
-                                          responseData["url"];
-                                      setState(() {
-                                        _localFormData[fieldName] = imageUrl;
-                                      });
-                                      widget.onFormDataChanged(_localFormData);
-                                      log("🟢 FORM DATA UPDATED: Field '$fieldName' now contains URL: $imageUrl");
-                                      log("🟢 This URL will be sent with the form data to map.php");
-
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(SnackBar(
-                                        content: Text('تم رفع الصورة بنجاح'),
-                                        backgroundColor: Colors.green,
-                                      ));
-                                    } else {
-                                      log("🔴 IMAGE UPLOAD SERVER ERROR: ${responseData["message"] ?? "Unknown error"}");
-
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(SnackBar(
-                                        content: Text(
-                                            'فشل رفع الصورة: ${responseData["message"] ?? "خطأ غير معروف"}'),
-                                        backgroundColor: Colors.red,
-                                      ));
-                                    }
-                                  } else {
-                                    log("🔴 IMAGE UPLOAD HTTP ERROR: ${response.statusCode}");
-                                    log("🔴 STATUS MESSAGE: ${response.statusMessage}");
-
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(SnackBar(
-                                      content: Text(
-                                          'خطأ في الخادم: ${response.statusCode}'),
-                                      backgroundColor: Colors.red,
-                                    ));
-                                  }
-                                  log("===========================================================");
-                                } on DioException catch (dioError) {
-                                  log("===========================================================");
-                                  log("🔴 IMAGE UPLOAD DIO ERROR:");
-                                  log("🔴 ERROR TYPE: ${dioError.type}");
-                                  log("🔴 ERROR MESSAGE: ${dioError.message}");
-                                  if (dioError.response != null) {
-                                    log("🔴 STATUS CODE: ${dioError.response?.statusCode}");
-                                    log("🔴 RESPONSE DATA: ${jsonEncode(dioError.response?.data)}");
-                                  }
-                                  log("===========================================================");
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(const SnackBar(
+                                    content: Text('تم رفع الصورة بنجاح'),
+                                    backgroundColor: Colors.green,
+                                  ));
+                                } else {
+                                  log("🔴 IMAGE UPLOAD SERVER ERROR: ${responseData["message"] ?? "Unknown error"}");
 
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(SnackBar(
                                     content: Text(
-                                        'خطأ في الاتصال: ${dioError.message}'),
+                                        'فشل رفع الصورة: ${responseData["message"] ?? "خطأ غير معروف"}'),
                                     backgroundColor: Colors.red,
                                   ));
                                 }
-                              } catch (e) {
-                                log("===========================================================");
-                                log("🔴 CAMERA ERROR: $e");
-                                log("===========================================================");
+                              } else {
+                                log("🔴 IMAGE UPLOAD HTTP ERROR: ${response.statusCode}");
+                                log("🔴 STATUS MESSAGE: ${response.statusMessage}");
 
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(SnackBar(
-                                  content:
-                                      Text('حدث خطأ أثناء التقاط الصورة: $e'),
+                                  content: Text(
+                                      'خطأ في الخادم: ${response.statusCode}'),
                                   backgroundColor: Colors.red,
                                 ));
-                              } finally {
-                                if (mounted) {
-                                  setState(() {
-                                    _isUploading[fieldName] = false;
-                                  });
-                                }
                               }
-                            },
-                      child: _isUploading[fieldName]!
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.0,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : Text(
-                              'التقاط صورة',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'Cairo',
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (state.hasError)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0, right: 12),
-                child: Text(
-                  state.errorText!,
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 12.sp,
-                    fontFamily: 'Cairo',
-                  ),
+                              log("===========================================================");
+                            } on DioException catch (dioError) {
+                              log("===========================================================");
+                              log("🔴 IMAGE UPLOAD DIO ERROR:");
+                              log("🔴 ERROR TYPE: ${dioError.type}");
+                              log("🔴 ERROR MESSAGE: ${dioError.message}");
+                              if (dioError.response != null) {
+                                log("🔴 STATUS CODE: ${dioError.response?.statusCode}");
+                                log("🔴 RESPONSE DATA: ${jsonEncode(dioError.response?.data)}");
+                              }
+                              log("===========================================================");
+
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content:
+                                    Text('خطأ في الاتصال: ${dioError.message}'),
+                                backgroundColor: Colors.red,
+                              ));
+                            }
+                          } catch (e) {
+                            log("===========================================================");
+                            log("🔴 CAMERA ERROR: $e");
+                            log("===========================================================");
+
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('حدث خطأ أثناء التقاط الصورة: $e'),
+                              backgroundColor: Colors.red,
+                            ));
+                          } finally {
+                            setLocalState(() {
+                              isUploading = false;
+                            });
+                          }
+                        },
+                  child: isUploading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          'التقاط صورة',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Cairo',
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                 ),
               ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -3136,167 +3285,208 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
   // Updated camera widget to use 'image' parameter
   Widget buildCameraBackWidget(
       String fieldName, Map<String, dynamic> fieldConfig) {
-    bool isRequired = fieldConfig["required"] == true;
-    _fieldKeys[fieldName] = GlobalKey<FormFieldState>();
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setLocalState) {
+        bool isUploading = false;
 
-    return FormField<String>(
-      key: _fieldKeys[fieldName],
-      initialValue: _localFormData[fieldName],
-      validator: (value) {
-        if (isRequired && (value == null || value.isEmpty)) {
-          return 'هذا الحقل مطلوب';
-        }
-        return null;
-      },
-      builder: (FormFieldState<String> state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 50,
-              color: const Color(0xffEFF1F9),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: Text(
-                        state.value != null && state.value!.isNotEmpty
-                            ? (state.value!.contains("/")
-                                ? state.value!.split('/').last
-                                : state.value!)
-                            : 'لم يتم التقاط صورة${isRequired ? ' *' : ''}',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xff909090),
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+        return Container(
+          height: 50,
+          color: const Color(0xffEFF1F9),
+          child: Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Text(
+                    _localFormData[fieldName] != null
+                        ? (_localFormData[fieldName].toString().contains("/")
+                            ? _localFormData[fieldName]
+                                .toString()
+                                .split('/')
+                                .last
+                            : _localFormData[fieldName].toString())
+                        : 'لم يتم اختيار صورة',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontFamily: 'Cairo',
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xff909090),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xffBFBFBF),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
                     ),
                   ),
-                  SizedBox(
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xffBFBFBF),
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                      ),
-                      onPressed: _isUploading[fieldName] == true
-                          ? null
-                          : () async {
-                              setState(() {
-                                _isUploading[fieldName] = true;
+                  onPressed: isUploading
+                      ? null
+                      : () async {
+                          log("🔵 Camera button pressed for field: $fieldName (back camera)");
+
+                          setLocalState(() {
+                            isUploading = true;
+                          });
+
+                          try {
+                            final picker = ImagePicker();
+                            final pickedFile = await picker.pickImage(
+                              source: ImageSource.camera,
+                              preferredCameraDevice: CameraDevice.rear,
+                            );
+                            if (pickedFile == null) {
+                              log("🔵 Camera capture canceled for field: $fieldName");
+                              setLocalState(() {
+                                isUploading = false;
                               });
-                              try {
-                                final picker = ImagePicker();
-                                final pickedFile = await picker.pickImage(
-                                  source: ImageSource.camera,
-                                  preferredCameraDevice: CameraDevice.rear,
-                                );
+                              return;
+                            }
 
-                                if (pickedFile == null) {
-                                  setState(() {
-                                    _isUploading[fieldName] = false;
-                                  });
-                                  return;
-                                }
+                            final String imagePath = pickedFile.path;
+                            final String imageName = imagePath.split('/').last;
 
-                                final String imagePath = pickedFile.path;
-                                final String imageName =
-                                    imagePath.split('/').last;
+                            log("🔵 Image captured for $fieldName: $imageName (path: $imagePath)");
 
-                                setState(() {
-                                  _localFormData[fieldName] = imagePath;
-                                });
-                                widget.onFormDataChanged(_localFormData);
+                            setState(() {
+                              _localFormData[fieldName] = imagePath;
+                            });
+                            widget.onFormDataChanged(_localFormData);
 
-                                var formData = FormData.fromMap({
-                                  'image': await MultipartFile.fromFile(
-                                    imagePath,
-                                    filename: imageName,
-                                  )
-                                });
+                            // Create form data for upload - IMPORTANT: Using 'image' parameter
+                            log("===========================================================");
+                            log("🔵 UPLOADING IMAGE FOR FIELD: $fieldName");
+                            log("🔵 IMAGE NAME: $imageName");
+                            log("🔵 IMAGE PATH: $imagePath");
+                            log("🔵 CAMERA: Back");
+                            log("🔵 IMPORTANT: Using parameter name 'image' as required by the API");
+                            log("===========================================================");
 
-                                var response = await _dio.post(
-                                  'https://ha55a.exchange/api/v1/order/upload.php',
-                                  data: formData,
-                                );
+                            var formData = FormData.fromMap({
+                              'image': await MultipartFile.fromFile(
+                                imagePath,
+                                filename: imageName,
+                              )
+                            });
 
-                                if (response.statusCode == 200 &&
-                                    response.data["success"] == true) {
-                                  final String imageUrl = response.data["url"];
+                            var dio = Dio();
+                            try {
+                              log("🔵 Sending image upload request to: https://ha55a.exchange/api/v1/order/upload.php");
+
+                              var response = await dio.post(
+                                'https://ha55a.exchange/api/v1/order/upload.php',
+                                data: formData,
+                              );
+
+                              log("===========================================================");
+                              if (response.statusCode == 200) {
+                                log("🟢 IMAGE UPLOAD RESPONSE:");
+                                log("🟢 STATUS CODE: ${response.statusCode}");
+                                log("🟢 RESPONSE DATA: ${jsonEncode(response.data)}");
+
+                                var responseData = response.data;
+                                if (responseData["success"] == true &&
+                                    responseData["url"] != null) {
+                                  log("🟢 IMAGE UPLOADED SUCCESSFULLY");
+                                  log("🟢 UPLOADED URL: ${responseData["url"]}");
+
+                                  // Save image URL to form data for later use in API calls
+                                  final String imageUrl = responseData["url"];
                                   setState(() {
                                     _localFormData[fieldName] = imageUrl;
                                   });
                                   widget.onFormDataChanged(_localFormData);
+                                  log("🟢 FORM DATA UPDATED: Field '$fieldName' now contains URL: $imageUrl");
+                                  log("🟢 This URL will be sent with the form data to map.php");
 
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('تم رفع الصورة بنجاح'),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(const SnackBar(
+                                    content: Text('تم رفع الصورة بنجاح'),
+                                    backgroundColor: Colors.green,
+                                  ));
                                 } else {
-                                  throw Exception('فشل رفع الصورة');
-                                }
-                              } catch (e) {
-                                log("🔴 CAMERA ERROR: $e");
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content:
-                                        Text('حدث خطأ أثناء التقاط الصورة: $e'),
+                                  log("🔴 IMAGE UPLOAD SERVER ERROR: ${responseData["message"] ?? "Unknown error"}");
+
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                    content: Text(
+                                        'فشل رفع الصورة: ${responseData["message"] ?? "خطأ غير معروف"}'),
                                     backgroundColor: Colors.red,
-                                  ),
-                                );
-                              } finally {
-                                if (mounted) {
-                                  setState(() {
-                                    _isUploading[fieldName] = false;
-                                  });
+                                  ));
                                 }
+                              } else {
+                                log("🔴 IMAGE UPLOAD HTTP ERROR: ${response.statusCode}");
+                                log("🔴 STATUS MESSAGE: ${response.statusMessage}");
+
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                  content: Text(
+                                      'خطأ في الخادم: ${response.statusCode}'),
+                                  backgroundColor: Colors.red,
+                                ));
                               }
-                            },
-                      child: _isUploading[fieldName] == true
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.0,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : Text(
-                              'التقاط صورة',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'Cairo',
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (state.hasError)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0, right: 12),
-                child: Text(
-                  state.errorText!,
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 12.sp,
-                    fontFamily: 'Cairo',
-                  ),
+                              log("===========================================================");
+                            } on DioException catch (dioError) {
+                              log("===========================================================");
+                              log("🔴 IMAGE UPLOAD DIO ERROR:");
+                              log("🔴 ERROR TYPE: ${dioError.type}");
+                              log("🔴 ERROR MESSAGE: ${dioError.message}");
+                              if (dioError.response != null) {
+                                log("🔴 STATUS CODE: ${dioError.response?.statusCode}");
+                                log("🔴 RESPONSE DATA: ${jsonEncode(dioError.response?.data)}");
+                              }
+                              log("===========================================================");
+
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content:
+                                    Text('خطأ في الاتصال: ${dioError.message}'),
+                                backgroundColor: Colors.red,
+                              ));
+                            }
+                          } catch (e) {
+                            log("===========================================================");
+                            log("🔴 CAMERA ERROR: $e");
+                            log("===========================================================");
+
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('حدث خطأ أثناء التقاط الصورة: $e'),
+                              backgroundColor: Colors.red,
+                            ));
+                          } finally {
+                            setLocalState(() {
+                              isUploading = false;
+                            });
+                          }
+                        },
+                  child: isUploading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          'التقاط صورة',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Cairo',
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                 ),
               ),
-          ],
+            ],
+          ),
         );
       },
     );

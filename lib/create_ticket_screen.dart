@@ -193,7 +193,7 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
       print("All attachments have been sent to the ticket");
     } catch (e) {
       print("Error attaching files to ticket: $e");
-      if (e is DioError && e.response != null) {
+      if (e is DioException && e.response != null) {
         print("Error response data: ${e.response?.data}");
         print("Error status code: ${e.response?.statusCode}");
       }
@@ -848,9 +848,9 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
               ),
             )
           else if (isUploaded)
-            Icon(
+            const Icon(
               Icons.check_circle,
-              color: const Color(0xFF4CAF50),
+              color: Color(0xFF4CAF50),
               size: 20,
             )
           else
@@ -922,7 +922,7 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
             ? Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     height: 24,
                     width: 24,
                     child: CircularProgressIndicator(

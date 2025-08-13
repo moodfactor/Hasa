@@ -55,26 +55,39 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _checkMaintenanceAndOnboardingStatus() async {
-    await Future.delayed(const Duration(seconds: 3));
+    try {
+      await Future.delayed(const Duration(seconds: 3));
 
-    final isInMaintenance = await MaintenanceService().checkMaintenanceStatus();
-    log("Maintenance check result: $isInMaintenance");
+      // Add timeout for maintenance check
+      final isInMaintenance = await MaintenanceService().checkMaintenanceStatus().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          log("⚠️ Maintenance check timed out, proceeding with normal flow");
+          return false;
+        },
+      );
+      log("Maintenance check result: $isInMaintenance");
 
-    if (isInMaintenance) {
-      _navigateTo(const MaintenanceScreen());
-      return;
-    }
+      if (isInMaintenance) {
+        _navigateTo(const MaintenanceScreen());
+        return;
+      }
 
-    final prefs = await SharedPreferences.getInstance();
-    final bool? onboardingCompleted = prefs.getBool('onboarding_completed');
-    final String? userJson = prefs.getString('user_data');
+      final prefs = await SharedPreferences.getInstance();
+      final bool? onboardingCompleted = prefs.getBool('onboarding_completed');
+      final String? userJson = prefs.getString('user_data');
 
-    if (onboardingCompleted == null || onboardingCompleted == false) {
-      _navigateTo(const OnboardingScreen());
-    } else if (userJson != null) {
-      await _fetchAndUpdateUserData();
-      await firebaseToken();
-    } else {
+      if (onboardingCompleted == null || onboardingCompleted == false) {
+        _navigateTo(const OnboardingScreen());
+      } else if (userJson != null) {
+        await _fetchAndUpdateUserData();
+        await firebaseToken();
+      } else {
+        _navigateTo(const LoginScreen());
+      }
+    } catch (e) {
+      log("🔴 Error in splash screen flow: $e");
+      // Fallback to login screen if anything goes wrong
       _navigateTo(const LoginScreen());
     }
   }
@@ -149,18 +162,33 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _checkAndShowPinLock(Widget nextScreen) async {
-    final PinSecurityService pinService = PinSecurityService();
-    final isPinSet = await pinService.isPinSet();
-
-    if (isPinSet) {
-      // PIN is set, show PIN lock screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) => PinLockScreen(nextScreen: nextScreen)),
+    try {
+      final PinSecurityService pinService = PinSecurityService();
+      final isPinSet = await pinService.isPinSet().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          log("⚠️ PIN check timed out, proceeding without PIN");
+          return false;
+        },
       );
-    } else {
-      // PIN not set, proceed normally
+
+      if (isPinSet) {
+        // PIN is set, show PIN lock screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => PinLockScreen(nextScreen: nextScreen)),
+        );
+      } else {
+        // PIN not set, proceed normally
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => nextScreen),
+        );
+      }
+    } catch (e) {
+      log("🔴 Error checking PIN: $e");
+      // If PIN check fails, proceed without PIN
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => nextScreen),

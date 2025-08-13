@@ -102,13 +102,13 @@ class _TransactionDetailsScreenState extends State<TransactionDetailsScreen>
             // الخلفية مع التموّج
             Container(
               height: 240.h,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topRight,
                   end: Alignment.bottomLeft,
                   colors: [
-                    const Color(0xFF38659B),
-                    const Color(0xFF254672),
+                    Color(0xFF38659B),
+                    Color(0xFF254672),
                   ],
                 ),
               ),
@@ -1017,14 +1017,14 @@ class _TransactionDetailsScreenState extends State<TransactionDetailsScreen>
                 color: Colors.green.shade700,
               ),
             ),
-            title: Text(
+            title: const Text(
               'اتصل بنا',
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w600,
               ),
             ),
-            subtitle: Text(
+            subtitle: const Text(
               '+964 750 123 4567',
               style: TextStyle(
                 fontFamily: 'Cairo',
@@ -1041,14 +1041,14 @@ class _TransactionDetailsScreenState extends State<TransactionDetailsScreen>
                 color: Colors.blue.shade700,
               ),
             ),
-            title: Text(
+            title: const Text(
               'محادثة مباشرة',
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w600,
               ),
             ),
-            subtitle: Text(
+            subtitle: const Text(
               'متاح الآن',
               style: TextStyle(
                 fontFamily: 'Cairo',

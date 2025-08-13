@@ -315,7 +315,7 @@ class _TfaOtpScreenState extends State<TfaOtpScreen>
               right: 0,
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
-                child: Center(
+                child: const Center(
                     // child: Text(
                     //   'المصادقة الثنائية',
                     //   style: TextStyle(

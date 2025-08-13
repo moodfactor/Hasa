@@ -96,7 +96,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
 
         // Success notification
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('تم إرسال الرد بنجاح'),
             backgroundColor: Colors.green,
           ),
@@ -104,7 +104,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
       } else {
         // Error notification
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('فشل في إرسال الرد'),
             backgroundColor: Colors.red,
           ),
@@ -113,7 +113,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
     } catch (e) {
       // Error notification
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('خطأ أثناء الاتصال بالشبكة'),
           backgroundColor: Colors.red,
         ),
@@ -206,10 +206,10 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                 children: [
                   // Send button
                   _isSending
-                      ? CircularProgressIndicator(
+                      ? const CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                              const Color(0xFFF5951F)),
+                              Color(0xFFF5951F)),
                         )
                       : Material(
                           color: const Color(0xFFF5951F),

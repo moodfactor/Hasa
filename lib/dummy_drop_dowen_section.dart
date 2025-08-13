@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_project/dummp_drop_dowen.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
 class DummyDropDowenSection extends StatelessWidget {
   const DummyDropDowenSection({super.key});

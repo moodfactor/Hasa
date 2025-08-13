@@ -276,12 +276,12 @@ class _ReferralsScreenState extends State<ReferralsScreen>
                                       // Referral link card
                                       Container(
                                         decoration: BoxDecoration(
-                                          gradient: LinearGradient(
+                                          gradient: const LinearGradient(
                                             begin: Alignment.topLeft,
                                             end: Alignment.bottomRight,
                                             colors: [
-                                              const Color(0xFFF8FAFC),
-                                              const Color(0xFFE2E8F0),
+                                              Color(0xFFF8FAFC),
+                                              Color(0xFFE2E8F0),
                                             ],
                                           ),
                                           borderRadius:

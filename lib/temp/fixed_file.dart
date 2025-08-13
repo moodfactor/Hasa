@@ -77,7 +77,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('حدث خطأ أثناء إغلاق التذكرة'),
+              content: const Text('حدث خطأ أثناء إغلاق التذكرة'),
               backgroundColor: Colors.red.shade700,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
@@ -91,7 +91,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ أثناء إغلاق التذكرة'),
+            content: const Text('حدث خطأ أثناء إغلاق التذكرة'),
             backgroundColor: Colors.red.shade700,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -140,7 +140,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ أثناء تحميل التذكرة'),
+            content: const Text('حدث خطأ أثناء تحميل التذكرة'),
             backgroundColor: Colors.red.shade700,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -237,7 +237,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
     if (messageController.text.isEmpty && selectedFiles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('الرجاء كتابة رسالة أو إرفاق ملف'),
+          content: const Text('الرجاء كتابة رسالة أو إرفاق ملف'),
           backgroundColor: Colors.red.shade700,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -269,7 +269,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
         log('Warning: No user data found in SharedPreferences');
       }
 
-      final String apiUrl = 'https://ha55a.exchange/api/v1/ticket/add.php';
+      const String apiUrl = 'https://ha55a.exchange/api/v1/ticket/add.php';
       log('Using API URL: $apiUrl');
 
       var formData = FormData.fromMap({
@@ -326,7 +326,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('تم إرسال الرسالة بنجاح'),
+              content: const Text('تم إرسال الرسالة بنجاح'),
               backgroundColor: Colors.green.shade700,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
@@ -906,7 +906,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
                                     ],
                                   ),
                                 ),
-                                Container(
+                                SizedBox(
                                   height:
                                       selectedFiles.length > 2 ? 120.h : 70.h,
                                   child: ListView.builder(
@@ -976,7 +976,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
                                                   decoration: BoxDecoration(
                                                     color: Colors.grey.shade50,
                                                     borderRadius:
-                                                        BorderRadius.only(
+                                                        const BorderRadius.only(
                                                       bottomLeft:
                                                           Radius.circular(8),
                                                       bottomRight:
@@ -985,9 +985,8 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
                                                   ),
                                                   child: Text(
                                                     fileName.length > 15
-                                                        ? fileName.substring(
-                                                                0, 12) +
-                                                            '...'
+                                                        ? '${fileName.substring(
+                                                                0, 12)}...'
                                                         : fileName,
                                                     style: TextStyle(
                                                       fontFamily: 'Cairo',
@@ -1298,7 +1297,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
       log('خطأ في اختيار الصورة: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('حدث خطأ أثناء اختيار الصورة'),
+          content: const Text('حدث خطأ أثناء اختيار الصورة'),
           backgroundColor: Colors.red.shade700,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -1330,7 +1329,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
       log('خطأ في اختيار الملفات: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('حدث خطأ أثناء اختيار الملفات'),
+          content: const Text('حدث خطأ أثناء اختيار الملفات'),
           backgroundColor: Colors.red.shade700,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(

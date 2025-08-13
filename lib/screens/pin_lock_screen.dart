@@ -565,10 +565,10 @@ class _PinLockScreenState extends State<PinLockScreen>
                                         fontSize: 26.sp,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white,
-                                        shadows: [
+                                        shadows: const [
                                           Shadow(
                                             color: Colors.black26,
-                                            offset: const Offset(0, 1),
+                                            offset: Offset(0, 1),
                                             blurRadius: 2,
                                           ),
                                         ],

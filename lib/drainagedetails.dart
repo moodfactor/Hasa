@@ -255,13 +255,13 @@ class _DrainagedetailsState extends State<Drainagedetails>
                     // Background gradient header
                     Container(
                       height: 220.h,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topRight,
                           end: Alignment.bottomLeft,
                           colors: [
-                            const Color(0xFF38659B),
-                            const Color(0xFF254672),
+                            Color(0xFF38659B),
+                            Color(0xFF254672),
                           ],
                         ),
                       ),
@@ -428,7 +428,7 @@ class _DrainagedetailsState extends State<Drainagedetails>
                                       bottomRight: Radius.circular(25.r),
                                     ),
                                   ),
-                                  child: Center(child: Text('تفاصيل الإرسال')),
+                                  child: const Center(child: Text('تفاصيل الإرسال')),
                                 ),
                                 Container(
                                   width: double.infinity,
@@ -439,7 +439,7 @@ class _DrainagedetailsState extends State<Drainagedetails>
                                       bottomLeft: Radius.circular(25.r),
                                     ),
                                   ),
-                                  child: Center(child: Text('تفاصيل الاستلام')),
+                                  child: const Center(child: Text('تفاصيل الاستلام')),
                                 ),
                               ],
                             ),
@@ -965,7 +965,7 @@ class _DrainagedetailsState extends State<Drainagedetails>
 
   Widget _buildTimelineProgress(int status) {
     // 1 and 11 = مكتملة, 2 = قيد التنفيذ, 9 = مغلقة, 12 = تحت التحقيق, other = استرداد
-    final bool isOrderPlaced = true; // Always true once we have order details
+    const bool isOrderPlaced = true; // Always true once we have order details
     final bool isUnderInvestigation = status == 12;
     // For status 12 (under investigation), the order is not yet in processing stage
     final bool isProcessing =
@@ -1474,7 +1474,7 @@ class _DrainagedetailsState extends State<Drainagedetails>
             // Intentar limpiar y parsear el string como JSON
             addressStr = addressStr.replaceAll('(', '{').replaceAll(')', '}');
             if (!addressStr.startsWith('{')) {
-              addressStr = '{' + addressStr + '}';
+              addressStr = '{$addressStr}';
             }
 
             // Intentar parsear como JSON
@@ -1548,7 +1548,7 @@ class _DrainagedetailsState extends State<Drainagedetails>
                 // Encabezado con logo
                 pw.Container(
                   padding: const pw.EdgeInsets.all(10),
-                  color: PdfColor(0.22, 0.30, 0.47),
+                  color: const PdfColor(0.22, 0.30, 0.47),
                   child: pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
@@ -1562,7 +1562,7 @@ class _DrainagedetailsState extends State<Drainagedetails>
                         'إيصال معاملة هسه',
                         style: pw.TextStyle(
                           font: ttfBold,
-                          color: PdfColor(1, 1, 1),
+                          color: const PdfColor(1, 1, 1),
                           fontSize: 14,
                         ),
                         textDirection: pw.TextDirection.rtl,
@@ -1583,7 +1583,7 @@ class _DrainagedetailsState extends State<Drainagedetails>
                         padding: const pw.EdgeInsets.all(8),
                         decoration: pw.BoxDecoration(
                           border:
-                              pw.Border.all(color: PdfColor(0.86, 0.87, 0.87)),
+                              pw.Border.all(color: const PdfColor(0.86, 0.87, 0.87)),
                           borderRadius: pw.BorderRadius.circular(5),
                         ),
                         child: pw.Column(
@@ -1624,9 +1624,9 @@ class _DrainagedetailsState extends State<Drainagedetails>
                         padding: const pw.EdgeInsets.all(8),
                         decoration: pw.BoxDecoration(
                           border:
-                              pw.Border.all(color: PdfColor(0.86, 0.87, 0.87)),
+                              pw.Border.all(color: const PdfColor(0.86, 0.87, 0.87)),
                           borderRadius: pw.BorderRadius.circular(5),
-                          color: PdfColor(0.97, 0.97, 0.97),
+                          color: const PdfColor(0.97, 0.97, 0.97),
                         ),
                         child: pw.Column(
                           crossAxisAlignment: pw.CrossAxisAlignment.end,
@@ -1658,7 +1658,7 @@ class _DrainagedetailsState extends State<Drainagedetails>
                 pw.Container(
                   padding: const pw.EdgeInsets.all(8),
                   decoration: pw.BoxDecoration(
-                    border: pw.Border.all(color: PdfColor(0.86, 0.87, 0.87)),
+                    border: pw.Border.all(color: const PdfColor(0.86, 0.87, 0.87)),
                     borderRadius: pw.BorderRadius.circular(5),
                   ),
                   child: pw.Column(
@@ -1707,7 +1707,7 @@ class _DrainagedetailsState extends State<Drainagedetails>
                 pw.Container(
                   padding: const pw.EdgeInsets.all(8),
                   decoration: pw.BoxDecoration(
-                    border: pw.Border.all(color: PdfColor(0.86, 0.87, 0.87)),
+                    border: pw.Border.all(color: const PdfColor(0.86, 0.87, 0.87)),
                     borderRadius: pw.BorderRadius.circular(5),
                   ),
                   child: pw.Column(
@@ -1814,19 +1814,19 @@ class _DrainagedetailsState extends State<Drainagedetails>
                     decoration: pw.BoxDecoration(
                       border: pw.Border.all(
                         color: statusValue == 9
-                            ? PdfColor(0.9, 0.3, 0.3) // Red for canceled
+                            ? const PdfColor(0.9, 0.3, 0.3) // Red for canceled
                             : statusValue == 12
-                                ? PdfColor(
+                                ? const PdfColor(
                                     0.6, 0.2, 0.6) // Purple for investigation
-                                : PdfColor(0.2, 0.4, 0.8), // Blue for refund
+                                : const PdfColor(0.2, 0.4, 0.8), // Blue for refund
                       ),
                       borderRadius: pw.BorderRadius.circular(5),
                       color: statusValue == 9
-                          ? PdfColor(1.0, 0.9, 0.9) // Light red background
+                          ? const PdfColor(1.0, 0.9, 0.9) // Light red background
                           : statusValue == 12
-                              ? PdfColor(
+                              ? const PdfColor(
                                   0.97, 0.9, 0.97) // Light purple background
-                              : PdfColor(
+                              : const PdfColor(
                                   0.9, 0.95, 1.0), // Light blue background
                     ),
                     child: pw.Column(
@@ -1842,10 +1842,10 @@ class _DrainagedetailsState extends State<Drainagedetails>
                             font: ttfBold,
                             fontSize: 10,
                             color: statusValue == 9
-                                ? PdfColor(0.8, 0.2, 0.2) // Dark red
+                                ? const PdfColor(0.8, 0.2, 0.2) // Dark red
                                 : statusValue == 12
-                                    ? PdfColor(0.6, 0.2, 0.6) // Dark purple
-                                    : PdfColor(0.1, 0.3, 0.7), // Dark blue
+                                    ? const PdfColor(0.6, 0.2, 0.6) // Dark purple
+                                    : const PdfColor(0.1, 0.3, 0.7), // Dark blue
                           ),
                           textDirection: pw.TextDirection.rtl,
                         ),
@@ -1873,7 +1873,7 @@ class _DrainagedetailsState extends State<Drainagedetails>
                         padding: const pw.EdgeInsets.all(8),
                         decoration: pw.BoxDecoration(
                           border:
-                              pw.Border.all(color: PdfColor(0.86, 0.87, 0.87)),
+                              pw.Border.all(color: const PdfColor(0.86, 0.87, 0.87)),
                           borderRadius: pw.BorderRadius.circular(5),
                         ),
                         child: pw.Column(
@@ -1920,7 +1920,7 @@ class _DrainagedetailsState extends State<Drainagedetails>
                         padding: const pw.EdgeInsets.all(8),
                         decoration: pw.BoxDecoration(
                           border:
-                              pw.Border.all(color: PdfColor(0.86, 0.87, 0.87)),
+                              pw.Border.all(color: const PdfColor(0.86, 0.87, 0.87)),
                           borderRadius: pw.BorderRadius.circular(5),
                         ),
                         child: pw.Column(
@@ -2064,7 +2064,7 @@ class _DrainagedetailsState extends State<Drainagedetails>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: Icon(Icons.close),
+                    icon: const Icon(Icons.close),
                     onPressed: () => Navigator.pop(context),
                   ),
                   Text(
@@ -2078,10 +2078,10 @@ class _DrainagedetailsState extends State<Drainagedetails>
                   ),
                 ],
               ),
-              Divider(),
+              const Divider(),
             ],
           ),
-          content: Container(
+          content: SizedBox(
             width: double.maxFinite,
             height: 400.h,
             child: Column(
@@ -2108,9 +2108,9 @@ class _DrainagedetailsState extends State<Drainagedetails>
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
-                                return Center(
+                                return const Center(
                                   child: CircularProgressIndicator(
-                                    color: const Color(0xFFF5951F),
+                                    color: Color(0xFFF5951F),
                                   ),
                                 );
                               }
@@ -2408,7 +2408,7 @@ class _DrainagedetailsState extends State<Drainagedetails>
                 ),
               ),
               backgroundColor: Colors.green,
-              duration: Duration(seconds: 3),
+              duration: const Duration(seconds: 3),
               action: SnackBarAction(
                 label: 'موافق',
                 textColor: Colors.white,
@@ -2436,7 +2436,7 @@ class _DrainagedetailsState extends State<Drainagedetails>
               ),
             ),
             backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
             action: SnackBarAction(
               label: 'موافق',
               textColor: Colors.white,
@@ -2448,7 +2448,7 @@ class _DrainagedetailsState extends State<Drainagedetails>
     } catch (e) {
       log("Error in _saveFileToDownloads: $e");
       // Re-throw to handle in the caller
-      throw e;
+      rethrow;
     }
   }
 
@@ -2509,7 +2509,7 @@ class _DrainagedetailsState extends State<Drainagedetails>
           } else if (decimals.length > 2) {
             decimals = decimals.substring(0, 2); // Máximo 2 decimales
           }
-          return parts[0] + '.' + decimals;
+          return '${parts[0]}.$decimals';
         }
       }
       return amount;

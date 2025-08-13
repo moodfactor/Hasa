@@ -78,7 +78,7 @@ class _AllTicketState extends State<AllTicket>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ أثناء تحميل التذاكر'),
+            content: const Text('حدث خطأ أثناء تحميل التذاكر'),
             backgroundColor: Colors.red.shade700,
             behavior: SnackBarBehavior.floating,
           ),

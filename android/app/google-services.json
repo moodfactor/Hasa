@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "764305815170",
+    "project_id": "hassa-app-1375c",
+    "storage_bucket": "hassa-app-1375c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:764305815170:android:9de452ec737df464aee69b",
+        "android_client_info": {
+          "package_name": "com.hasa.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyKDo2EjkxzCVtY137SVrJh44VKGGk36Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

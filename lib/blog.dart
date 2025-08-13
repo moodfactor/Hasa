@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:flutter/services.dart';
 import 'single_log.dart';
 
 class NewsScreen extends StatefulWidget {

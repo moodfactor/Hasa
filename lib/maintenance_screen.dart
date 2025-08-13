@@ -24,13 +24,13 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
         backgroundColor: Colors.white,
         body: Container(
           width: double.infinity,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                const Color(0xFFFFFFFF),
-                const Color(0xFFFFF8EE),
+                Color(0xFFFFFFFF),
+                Color(0xFFFFF8EE),
               ],
             ),
           ),
@@ -152,11 +152,11 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
                   Container(
                     width: double.infinity,
                     height: 6.h,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
                           Colors.transparent,
-                          const Color(0xFFF5951F),
+                          Color(0xFFF5951F),
                           Colors.transparent,
                         ],
                         begin: Alignment.centerRight,
@@ -463,7 +463,7 @@ class GearPainter extends CustomPainter {
     Path path = Path();
 
     // Number of teeth
-    final int teethCount = 8;
+    const int teethCount = 8;
     final double angleStep = 2 * 3.14159 / teethCount;
     final double outerRadius = radius;
     final double innerRadius = radius * 0.7;

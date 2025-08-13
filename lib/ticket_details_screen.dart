@@ -77,7 +77,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('حدث خطأ أثناء إغلاق التذكرة'),
+              content: const Text('حدث خطأ أثناء إغلاق التذكرة'),
               backgroundColor: Colors.red.shade700,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
@@ -91,7 +91,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ أثناء إغلاق التذكرة'),
+            content: const Text('حدث خطأ أثناء إغلاق التذكرة'),
             backgroundColor: Colors.red.shade700,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -150,7 +150,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ أثناء تحميل التذكرة'),
+            content: const Text('حدث خطأ أثناء تحميل التذكرة'),
             backgroundColor: Colors.red.shade700,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -269,7 +269,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
     if (messageController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('الرجاء كتابة رسالة قبل الإرسال'),
+          content: const Text('الرجاء كتابة رسالة قبل الإرسال'),
           backgroundColor: Colors.red.shade700,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -302,7 +302,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
       }
 
       // 1. Primero enviar el mensaje para obtener message_id
-      final String addMessageApiUrl =
+      const String addMessageApiUrl =
           'https://ha55a.exchange/api/v1/ticket/add.php';
       log('Using API URL: $addMessageApiUrl');
 
@@ -380,7 +380,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
 
                 // التأكد من أن الرابط يبدأ بـ http أو https
                 if (fileUrl.isNotEmpty && !fileUrl.startsWith('http')) {
-                  fileUrl = 'https://' + fileUrl.replaceAll(RegExp(r'^/+'), '');
+                  fileUrl = 'https://${fileUrl.replaceAll(RegExp(r'^/+'), '')}';
                   log('URL modified to ensure it starts with https: $fileUrl');
                 }
 
@@ -449,7 +449,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('تم إرسال الرسالة بنجاح'),
+                content: const Text('تم إرسال الرسالة بنجاح'),
                 backgroundColor: Colors.green.shade700,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
@@ -534,7 +534,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
         // Mostrar mensaje de éxito
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('تم إضافة الصورة بنجاح'),
+            content: const Text('تم إضافة الصورة بنجاح'),
             backgroundColor: Colors.green.shade700,
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 1),
@@ -548,7 +548,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
       log('خطأ في اختيار الصورة: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('حدث خطأ أثناء اختيار الصورة'),
+          content: const Text('حدث خطأ أثناء اختيار الصورة'),
           backgroundColor: Colors.red.shade700,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -1123,7 +1123,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
                                       ],
                                     ),
                                   ),
-                                  Container(
+                                  SizedBox(
                                     height:
                                         selectedFiles.length > 2 ? 120.h : 70.h,
                                     child: ListView.builder(
@@ -1196,7 +1196,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
                                                       color:
                                                           Colors.grey.shade50,
                                                       borderRadius:
-                                                          BorderRadius.only(
+                                                          const BorderRadius.only(
                                                         bottomLeft:
                                                             Radius.circular(8),
                                                         bottomRight:
@@ -1205,9 +1205,8 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
                                                     ),
                                                     child: Text(
                                                       fileName.length > 15
-                                                          ? fileName.substring(
-                                                                  0, 12) +
-                                                              '...'
+                                                          ? '${fileName.substring(
+                                                                  0, 12)}...'
                                                           : fileName,
                                                       style: TextStyle(
                                                         fontFamily: 'Cairo',
@@ -1788,7 +1787,7 @@ class TicketMessageCard extends StatelessWidget {
     // التأكد من أن الرابط يبدأ بـ http أو https
     if (!fileUrl.startsWith('http')) {
       if (fileUrl.contains('ha55a.exchange')) {
-        fileUrl = 'https://' + fileUrl.replaceAll(RegExp(r'^/+'), '');
+        fileUrl = 'https://${fileUrl.replaceAll(RegExp(r'^/+'), '')}';
       } else {
         fileUrl = 'https://ha55a.exchange/api/v1/order/uploads/$fileName';
       }

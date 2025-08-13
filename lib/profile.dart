@@ -193,9 +193,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen>
       });
 
       print("🔍 إرسال بيانات تحديث الملف الشخصي مع معلمات:");
-      data.fields.forEach((field) {
+      for (var field in data.fields) {
         print("🔍 ${field.key}: ${field.value}");
-      });
+      }
 
       _dio.options.headers = {
         'Accept': 'application/json',

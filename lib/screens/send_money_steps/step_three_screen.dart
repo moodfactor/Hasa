@@ -241,7 +241,7 @@ class _StepThreeScreenState extends State<StepThreeScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 50, color: Colors.red),
+                const Icon(Icons.error_outline, size: 50, color: Colors.red),
                 SizedBox(height: 16.h),
                 Text(
                   'حدث خطأ أثناء جلب التعليمات',
@@ -259,7 +259,7 @@ class _StepThreeScreenState extends State<StepThreeScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFF5951F),
                   ),
-                  child: Text('إعادة المحاولة'),
+                  child: const Text('إعادة المحاولة'),
                 ),
               ],
             ),
@@ -282,7 +282,7 @@ class _StepThreeScreenState extends State<StepThreeScreen> {
               children: [
                 // Step description in both languages
                 Container(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(8),
@@ -404,7 +404,7 @@ class _StepThreeScreenState extends State<StepThreeScreen> {
                 // Error message
                 if (_errorMessage.isNotEmpty)
                   Container(
-                    padding: EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.red[50],
                       borderRadius: BorderRadius.circular(8),
@@ -435,7 +435,7 @@ class _StepThreeScreenState extends State<StepThreeScreen> {
                       ),
                     ),
                     child: _isLoading
-                        ? SizedBox(
+                        ? const SizedBox(
                             height: 24,
                             width: 24,
                             child: CircularProgressIndicator(

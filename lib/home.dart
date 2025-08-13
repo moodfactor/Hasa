@@ -542,7 +542,7 @@ class _HomePageState extends State<HomePage> {
             builder: (context) => TransactionDetailsScreen(
               id: "demo-001",
               date: DateTime.now().toString().split(' ')[0],
-              sendDetails: {
+              sendDetails: const {
                 'method': 'حسة باي',
                 'currency': 'IQD',
                 'amount': '13,226,000.00',
@@ -550,7 +550,7 @@ class _HomePageState extends State<HomePage> {
                 'total': '13,226,000.00',
                 'image': 'https://ha55a.exchange/assets/images/logo.png',
               },
-              receiveDetails: {
+              receiveDetails: const {
                 'method': 'بنك العراق الأول',
                 'currency': 'USD',
                 'amount': '10,000.00',
@@ -627,8 +627,9 @@ class _HomePageState extends State<HomePage> {
                                                   ),
                                                   loadingBuilder: (context,
                                                       child, loadingProgress) {
-                                                    if (loadingProgress == null)
+                                                    if (loadingProgress == null) {
                                                       return child;
+                                                    }
                                                     return CircularProgressIndicator(
                                                       color: Colors.white,
                                                       strokeWidth: 2,
@@ -848,16 +849,16 @@ class _HomePageState extends State<HomePage> {
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 12, horizontal: 16),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF5F5F5),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFF5F5F5),
                               borderRadius: BorderRadius.only(
                                 topRight: Radius.circular(12),
                                 topLeft: Radius.circular(12),
                               ),
                             ),
-                            child: Row(
+                            child: const Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: const [
+                              children: [
                                 Text(
                                   "رقم الطلب",
                                   style: TextStyle(
@@ -946,7 +947,7 @@ class _HomePageState extends State<HomePage> {
                                           imageUrl: transaction[
                                               'send_currency_details']['image'],
                                         ),
-                                        Icon(Icons.arrow_forward,
+                                        const Icon(Icons.arrow_forward,
                                             size: 16, color: Colors.grey),
                                         _buildCurrencyCell(
                                           imageUrl: transaction[

@@ -25,8 +25,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   List<dynamic> transactions = [];
   late TabController _tabController;
-  bool _isSearching = false;
-  String _searchQuery = "";
+  final bool _isSearching = false;
+  final String _searchQuery = "";
 
   @override
   void initState() {
@@ -555,7 +555,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                                   SizedBox(width: 8.w),
                                   Expanded(
                                     child: Text(
-                                      '${netAmountStr} ${transaction['receive_currency_symbol'] ?? ''}',
+                                      '$netAmountStr ${transaction['receive_currency_symbol'] ?? ''}',
                                       style: TextStyle(
                                         fontFamily: 'Cairo',
                                         fontSize: 14.sp,
@@ -575,7 +575,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
 
                     // سهم للتحويل (movido un poco a la derecha)
                     Align(
-                      alignment: Alignment(
+                      alignment: const Alignment(
                           0.1, 0), // Movido ligeramente a la derecha del centro
                       child: Container(
                         margin: EdgeInsets.only(top: 30.h),
@@ -964,11 +964,11 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                 automaticallyImplyLeading: false,
                 flexibleSpace: FlexibleSpaceBar(
                   background: Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          const Color(0xFF38659B),
-                          const Color(0xFF2A4D74),
+                          Color(0xFF38659B),
+                          Color(0xFF2A4D74),
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,

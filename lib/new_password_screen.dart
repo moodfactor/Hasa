@@ -531,7 +531,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen>
           end: Offset.zero,
         ).animate(CurvedAnimation(
           parent: _animationController,
-          curve: Interval(0.2, 1.0, curve: Curves.easeOut),
+          curve: const Interval(0.2, 1.0, curve: Curves.easeOut),
         )),
         child: Container(
           margin: EdgeInsets.only(bottom: 20.h),
@@ -1016,7 +1016,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen>
                       child: Container(
                         width: 120.w,
                         height: 120.w,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
@@ -1043,7 +1043,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen>
                       child: Container(
                         width: 80.w,
                         height: 80.w,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),

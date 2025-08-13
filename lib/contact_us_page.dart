@@ -176,7 +176,7 @@ class _ContactUsPageState extends State<ContactUsPage>
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ أثناء الإرسال، يرجى المحاولة مرة أخرى'),
+            content: const Text('حدث خطأ أثناء الإرسال، يرجى المحاولة مرة أخرى'),
             backgroundColor: Colors.red.shade700,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(

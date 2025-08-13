@@ -347,11 +347,11 @@ class _PinSetupScreenState extends State<PinSetupScreen>
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Row(
+          content: const Row(
             children: [
-              const Icon(Icons.check_circle, color: Colors.white),
-              const SizedBox(width: 8),
-              const Text('تم حفظ رمز الحماية بنجاح'),
+              Icon(Icons.check_circle, color: Colors.white),
+              SizedBox(width: 8),
+              Text('تم حفظ رمز الحماية بنجاح'),
             ],
           ),
           backgroundColor: Colors.green,
